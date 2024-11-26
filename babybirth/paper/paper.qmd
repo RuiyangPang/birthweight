@@ -1,0 +1,357 @@
+---
+title: "Examining Birthweight Determinants: How Maternal Age, Education, Baby's Sex, and Gestational Period Shape Neonatal Outcomes"
+subtitle: "An Analysis of Birthweight in the United States in 1998"
+author: 
+  - First author
+  - Another author
+thanks: "Code and data are available at: [https://github.com/RohanAlexander/starter_folder](https://github.com/RohanAlexander/starter_folder)."
+date: today
+date-format: long
+abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+format: pdf
+number-sections: true
+bibliography: references.bib
+---
+
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+
+library(tidyverse)
+library(readr)
+library(here)
+library(rstanarm)
+library(modelsummary)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+library(gridExtra)
+
+
+```
+
+
+# Introduction
+
+The challenge of aging populations continues to hinder national economic growth, prompting governments to promote higher birth rates [@christensen2009ageing]. However, modern pressures such as intense job competition, housing shortages, and high living costs have led many young adults to opt for child-free lifestyles or limit their families to a single child. Within this context, the health of newborns becomes a critical focus, with birth weight serving as a key indicator. Low birth weight is associated with an increased risk of diseases like ischemic heart disease and chronic conditions later in life. Studies from the early 1980s highlight the link between low birth weight and fetal malnutrition, which can have lasting developmental effects [@paneth1995problem]. While economic and technological advancements have reduced malnutrition, identifying contemporary factors influencing birth weight is crucial. This study investigates the determinants of birthweight in today's society, exploring how various socioeconomic and biological factors interplay to shape neonatal outcomes.
+
+
+Estimand paragraph
+
+My estimand focuses on the relationship between birth weight and various factors. These factors include:
+
+- **Parental Attributes**: The age and education level of the parents and their marital status.
+
+- **Pregnancy and Infant Factors**: Gestation length, prenatal care, the number of prior live births, and the infant's sex.
+
+My goal is to determine which factors significantly affect birth weight, and I also want to understand how these factors contribute to the infant birth weight. This analysis aims to inform strategies for improving outcomes related to birth weight.
+
+
+Results paragraph
+
+Why it matters paragraph
+
+
+
+
+Telegraphing paragraph: The remainder of this paper is structured as follows. @sec-data....
+
+
+
+
+
+
+# Data {#sec-data}
+
+## Overview
+
+We use the statistical programming language R [@citeR], and with the help of several packages in R [@citeR] to explore these data and build regression models. These packages are include:  tidyverse [@tidyverse],knitr [@knitr],dplyr [@dplyr], here [@here], tinytex [@tinytex],readr [@readrC].
+
+
+Our data is published in the Data and Story Library (DASL) [@dasl_birthweight], an archive containing hundreds of datasets designed for teaching statistics and data science. I used the baby sample dataset from DASL, a randomly selected subset of 200 records from the 1998 Natality Public Dataset provided by the National Bureau of Economic Research (NBER) [@nber_birth]. This sample was generated using set.seed(1) in R to ensure reproducibility [@citeR]. Although the NBER dataset provides comprehensive information on all U.S. births in 1998, the full dataset includes over 3.9 million records and occupies nearly 200MB. Such a large dataset poses practical challenges. First, it significantly slows down computational processing. More importantly, in regression analysis, large sample sizes can lead to misleading results. Even minimal effect sizes may appear statistically significant but lack practical relevance, resulting in erroneous conclusions about predictor variables' importance. Following @tellingstories, we consider random sampling can help us to get a valid dataset to represent the population. The selected dataset contains 7 predictors and 1 outcome variable, with 200 observations, which is sufficient for meaningful regression analysis. we effectively reduced the dataset size while maintaining its representatives of the population. After the data clean, @tbl-clean-data shows a preview of the cleaned data set. 
+
+
+
+
+
+```{r fig.pos="h"}
+#| label: tbl-clean-data
+#| tbl-cap: "Preview of the cleaned 1998 birth data set"
+#| message: false
+#| echo: false
+
+birth <- read_csv(here::here("data/02-analysis_data/analysis_data.csv"))
+head(birth) |> 
+  kable()
+```
+
+## Measurement
+	
+The Natality Public Dataset is a comprehensive collection of U.S. birth records processed by the National Center for Health Statistics (NCHS). It includes detailed information on maternal and infant health, family demographics, and other birth-related variables. The dataset records births for both U.S. residents and non-residents but excludes births of U.S. citizens occurring outside the country. 
+
+In terms of measurement precision, the dataset replaces exact dates of birth with month and year to protect the privacy of newborns and parents. Geographic details are also simplified, making it less relevant for studies focusing on location-based factors. However, the focus of this dataset is on individual and family characteristics rather than geographic influence.
+
+The dataset is collected officially through birth registration processes required for legal documentation, ensuring high coverage and minimal data missingness. Although the dataset is reliable, some variables, such as paternal age and education, have higher rates of missing data. This discrepancy is due to the lesser involvement of fathers in birth registration and some families lacking complete paternal information.
+
+Despite these limitations, the dataset has low measurement error in variables like infant sex, gestational age, and maternal education. The 1998 dataset includes data for special areas like Northern Mariana Islands and American Samoa, providing an extensive range of records. Given its official source, the dataset serves as a robust foundation for analyzing maternal and infant health factors.
+
+
+## Outcome variables
+
+Birthweight is reported in some areas in pounds and ounces rather than grams. To ensure consistency, we present statistical data using the metric unit of grams. A birth weight below 2500 grams is classified as low birth weight, while a weight below 1500 grams is considered very low birth weight [@nchs_2008]. Newborns with low birth weight often require specialized care, such as admission to a Neonatal Intensive Care Unit (NICU).
+
+
+
+
+@fig-weight shows the distribution of the birth weight in the sample data set. Among the observations, `r sum(birth$weight < 2000)` cases are classified as low birth weight, representing approximately `r round(mean(birth$weight < 2000)*100,2)` % of the sample. The mean birth weight is `r round(mean(birth$weight),2)` grams, with the lowest recorded birth weight being `r round(min(birth$weight),2)` grams. The distribution of birth weights appears to be approximately normal. Given that the data was collected through random sampling, a linear regression model can be appropriately applied to analyze the relationships between birth weight and the selected predictors.
+
+
+```{r}
+#| label: fig-weight
+#| fig-cap: Birth weight of United States newborn in 1998
+#| echo: false
+
+ggplot(birth, aes(x = weight)) +
+  geom_histogram(binwidth = 200, fill = "skyblue", color = "black") +
+  labs(
+    title = "Histogram of Birth Weights",
+    x = "Birth Weight (grams)",
+    y = "Frequency"
+  ) +
+  theme_minimal()
+```
+
+
+## Predictor variables
+
+There are 4 numerical and 2 categorical predictors in the sample. The summary of these numerical predictors are shown in @tbl-summary， and their distribution are shown in @fig-predictor. 
+
+In this sample, maternal age ranges from 14 to 42 years, as shown in Figure 2. The distribution of maternal age is concentrated between 20 and 40 years, with the number of births decreasing steadily after age 30. Maternal age is obtained through official documentation, ensuring high accuracy.  
+
+Additionally, maternal education is mostly concentrated at 12 years, corresponding to high school completion. This peak likely reflects that many mothers choose to enter the workforce after high school. Another peak occurs at 16 years, aligning with the typical length of a university education, as completing a four-year degree results in 16 years of education.  
+
+The mode of gestational length is 40 weeks, with a sharp decline in births beyond 40 weeks. However, the probability of birth increases after 36 weeks, as 36 weeks marks the threshold for full-term infants, and delivery can occur anytime after this point.  
+
+**Prenatalstart** refers to the timing of when prenatal care begins during pregnancy. Earlier initiation of prenatal care is essential for promoting fetal development and supporting maternal health. In this dataset, the mode of prenatalstart is 2, indicating that most mothers began prenatal care during their second month of pregnancy. Furthermore, the majority of these values are less than 5, reflecting that in the United States, parents are generally able to detect pregnancy early and provide timely and necessary prenatal care.
+
+```{r}
+#| label: tbl-summary
+#| tbl-cap: "Statistics summary of the numerical predictors"
+#| message: false
+#| echo: false
+
+birth |> 
+  dplyr::select(-c(weight,sex,MomMarital)) |> 
+  summary() |>
+  kable(align = "c") %>%
+  kable_styling(font_size = 12)
+```
+
+```{r}
+#| label: fig-predictor
+#| fig-cap: histogram of predictors
+#| echo: false
+#| warning: false
+fig_MomAge <- ggplot(birth, aes(x = MomAge)) +
+  geom_histogram(bins = 10, alpha = 0.7, color = "lightblue") +
+  labs(x = "Mom's age",
+       y = "Frequency") +
+  theme_minimal()
+
+fig_MomEduc <- ggplot(birth, aes(x = MomEduc)) +
+  geom_histogram(bins = 10, alpha = 0.7, color = "lightblue") +
+  labs(x = "Mom's education",
+       y = "Frequency") +
+  theme_minimal()
+
+fig_gestation <- ggplot(birth, aes(x = gestation)) +
+  geom_histogram(bins = 10, alpha = 0.7, color = "lightblue") +
+  labs(x = "length of gestation",
+       y = "Frequency") +
+  theme_minimal()
+
+fig_prenatalstart <- ggplot(birth, aes(x = prenatalstart)) +
+  geom_histogram(bins = 10, alpha = 0.7, color = "lightblue") +
+  labs(x = "start of prenatal care",
+       y = "Frequency") +
+  theme_minimal()
+
+grid.arrange(fig_MomAge, fig_MomEduc, fig_gestation, fig_prenatalstart, nrow = 2)
+```
+
+
+```{r}
+#| label: fig-predictor1
+#| fig-cap: Barplot of predictors
+#| echo: false
+#| warning: false
+
+
+#Create individual plots for mom marital stauts
+plot_marital <- ggplot(birth, aes(x = factor(MomMarital))) +
+  geom_bar(position = "dodge") +
+  labs(title = "Marital staus", x = "Marital staus", y = "Count") +
+  theme_minimal()+
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(legend.position="none")
+
+plot_sex <- ggplot(birth, aes(x = factor(sex))) +
+  geom_bar(position = "dodge") +
+  labs(title = "Infant sex", x = "Sex", y = "Count") +
+  theme_minimal()+
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(legend.position="none")
+
+
+grid.arrange(plot_marital, plot_sex, nrow = 1)
+```
+
+The distribution of the two categorical variables are shown @fig-predictor1. From the barplot of marital status, about of the `r round(mean(birth$MomMarital==1)*100,2)`% mom is married. The proportion of male infant is a little higher than female infant. 
+
+@fig-correlation shows that as the length of gestation increases, birth weight also tends to rise. However, the correlation between gestation and birth weight is only `r round(cor(birth$gestation,birth$weight)*100,2)`%. This suggests that birth weight is not solely dependent on gestation but is also influenced by other factors. During the prenatal care phase, various parental attributes, pregnancy-related factors, and infant characteristics could all play a role in shaping birth weight. Therefore, in the following sections, I will use regression analysis to explore the impact of these factors on birth weight.
+
+
+```{r}
+#| label: fig-correlation
+#| fig-cap: Correlation between birth weight and gestation
+#| echo: false
+#| warning: false
+
+ggplot(data = birth, aes(x = gestation, y = weight)) +
+  geom_point(color = "blue", alpha = 0.6) + 
+  labs(
+    title = "Scatter Plot of Birth Weight vs. Gestation",
+    x = "Gestation Period (weeks)",
+    y = "Birth Weight (grams)"
+  ) +
+  theme_minimal()
+
+```
+
+
+# Model
+
+The goal of our modeling strategy is twofold. First, we aim to investigate the influence of Parental Attributes (such as parental age and education) and Pregnancy and Infant Factors (like gestational age, timing of prenatal care, and infant sex) on newborn birth weight. This analysis seeks to identify the critical determinants of birth weight and their relative impacts. Second, we aspire to derive insights from these findings that can inform the public about fundamental aspects of childbirth. For instance, we explore the roles of parental characteristics, the gestation period, and prenatal care in fostering healthy birth weights. Moreover, by including infant sex in the model, we aim to mitigate omitted variable bias, ensuring a more accurate understanding of predictor effects. This comprehensive approach not only contributes to the academic study of birth outcomes but also provides practical insights for improving maternal and neonatal health practices.
+
+
+Linear regression models are often used to estimate relationships between continuous outcome variables and multiple predictors. However, the validity of linear regression can be compromised by various challenges, such as the assumption of linearity in predictors, homoscedasticity of errors, independence of observations, and the influence of outliers [@tellingstories]. To address the limitations of traditional linear regression models, this study employs a Bayesian analysis model.
+
+In the Bayesian framework, model parameters are treated as random variables with prior distributions that reflect initial beliefs or knowledge about these parameters [@rstanarm]. By combining the information from sample data with prior distributions, we derive the posterior distributions of the parameters. This posterior distribution provides a more robust basis for inference and prediction, particularly in cases where data assumptions are violated or sample sizes are small. Using Bayesian analysis allows for integrating prior knowledge and updating it with observed data, yielding potentially more accurate and nuanced results.
+
+## Model set-up
+
+I will use the Bayesian multiple linear regression model to build the relationship between birth weight and other predictors. Define $y_i$ as the birth weight in grams. Then the model is shown in the following: 
+
+\begin{align}
+y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
+\mu_i &= \beta_0 + \beta_1 MomAge_{i} + \beta_2 MomEduc_{i} + \beta_3 gestation_{i} + \beta_4 prenatalstart_{i} + \notag \\
+&\quad \gamma_1 MomMarital_{i} + \gamma_2 sex_{i} \\
+\beta_0 &\sim \mbox{Normal}(0, 2.5) \\
+\beta_1 &\sim \mbox{Normal}(0, 2.5) \\
+\beta_2 &\sim \mbox{Normal}(0, 2.5) \\
+\beta_3 &\sim \mbox{Normal}(0, 2.5) \\
+\beta_4 &\sim \mbox{Normal}(0, 2.5) \\
+\gamma_1 &\sim \mbox{Normal}(0, 2.5) \\
+\gamma_2 &\sim \mbox{Normal}(0, 2.5) \\
+\sigma &\sim \mbox{Exponential}(1)
+\end{align}
+
+We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
+
+
+### Model justification
+
+We expect a positive relationship between the length of gestation and birth weight, as longer gestation generally results in higher birth weights. Maternal age is another important factor influencing infant health. Older mothers, especially those over the age of 35, often face higher risks during pregnancy, which can impact fetal development [@frederiksen2018risk]. Maternal education level also plays a crucial role, as more educated mothers are more likely to understand and follow scientifically supported prenatal care practices, benefiting fetal growth. Additionally, marital status can influence pregnancy outcomes. Married women may receive more support from their partners, leading to better nutrition and healthcare, which in turn benefits fetal development. Furthermore, the earlier prenatal care begins, the more favorable it is for the fetus’s health. Given these considerations, we have selected these factors as predictors for our model. To account for potential biases due to infant gender, we have included it in the model to reduce omitted variable bias.
+
+# Results
+
+Our results are summarized in @tbl-modelresults.
+
+```{r}
+#| echo: false
+#| eval: true
+#| warning: false
+#| message: false
+
+library(rstanarm)
+
+first_model <-
+  readRDS(file = here::here("models/first_model.rds"))
+second_model <- 
+  readRDS(file = here::here("models/second_model.rds"))
+```
+
+```{r}
+#| echo: false
+#| eval: true
+#| label: tbl-modelresults1
+#| tbl-cap: "Linear regressin model on the birth weight"
+#| warning: false
+
+modelsummary::modelsummary(
+  list(
+    "First model" = first_model
+  ),
+  fmt = 2
+)
+```
+
+
+```{r}
+#| echo: false
+#| eval: true
+#| label: tbl-modelresults2
+#| tbl-cap: "Bayesian regressin model on the birth weight"
+#| warning: false
+
+modelsummary::modelsummary(
+  list(
+    "First model" = second_model
+  ),
+  fmt = 2
+)
+```
+
+
+# Discussion
+
+## First discussion point {#sec-first-point}
+
+If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
+
+## Second discussion point
+
+Please don't use these as sub-heading labels - change them to be what your point actually is.
+
+## Third discussion point
+
+## Weaknesses and next steps
+
+Weaknesses and next steps should also be included.
+
+\newpage
+
+\appendix
+
+# Appendix {-}
+
+
+# Additional data details
+
+# Model details {#sec-model-details}
+
+## Diagnostics
+
+@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
+
+@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
+
+
+
+\newpage
+
+
+# References
+
+
