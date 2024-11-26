@@ -2,9 +2,8 @@
 title: "Examining Birthweight Determinants: How Maternal Age, Education, Baby's Sex, and Gestational Period Shape Neonatal Outcomes"
 subtitle: "An Analysis of Birthweight in the United States in 1998"
 author: 
-  - First author
-  - Another author
-thanks: "Code and data are available at: [https://github.com/RohanAlexander/starter_folder](https://github.com/RohanAlexander/starter_folder)."
+  - Ruiyang Pang
+thanks: "Code and data are available at: [https://github.com/RuiyangPang/birthweight.git](https://github.com/RuiyangPang/birthweight.git)."
 date: today
 date-format: long
 abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
