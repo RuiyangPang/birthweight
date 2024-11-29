@@ -6,8 +6,9 @@ author:
 thanks: "Code and data are available at: [https://github.com/RuiyangPang/birthweight.git](https://github.com/RuiyangPang/birthweight.git)."
 date: today
 date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "This study examines factors influencing birth weight among infants born in the U.S. in 1998 using Ordinary Least Squares (OLS) and Bayesian regression models. The analysis shows that birth weight is positively associated with gestation length, maternal age, education, prenatal care timing, and infant gender, with gestation length having the most significant effect. However, the models explain less than 30% of the variation in birth weight, highlighting the limitations of the data in capturing unmeasured factors. These findings deepen our understanding of the complex determinants of infant health and offer insights for policies aimed at improving national infant health and fertility rates."
 format: pdf
+toc: true
 number-sections: true
 bibliography: references.bib
 ---
@@ -33,10 +34,11 @@ library(gridExtra)
 
 # Introduction
 
+## Overview
 The challenge of aging populations continues to hinder national economic growth, prompting governments to promote higher birth rates [@christensen2009ageing]. However, modern pressures such as intense job competition, housing shortages, and high living costs have led many young adults to opt for child-free lifestyles or limit their families to a single child. Within this context, the health of newborns becomes a critical focus, with birth weight serving as a key indicator. Low birth weight is associated with an increased risk of diseases like ischemic heart disease and chronic conditions later in life. Studies from the early 1980s highlight the link between low birth weight and fetal malnutrition, which can have lasting developmental effects [@paneth1995problem]. While economic and technological advancements have reduced malnutrition, identifying contemporary factors influencing birth weight is crucial. This study investigates the determinants of birthweight in today's society, exploring how various socioeconomic and biological factors interplay to shape neonatal outcomes.
 
 
-Estimand paragraph
+## Estimand 
 
 My estimand focuses on the relationship between birth weight and various factors. These factors include:
 
@@ -47,14 +49,13 @@ My estimand focuses on the relationship between birth weight and various factors
 My goal is to determine which factors significantly affect birth weight, and I also want to understand how these factors contribute to the infant birth weight. This analysis aims to inform strategies for improving outcomes related to birth weight.
 
 
-Results paragraph
 
-Why it matters paragraph
+This study explored the relationship between various maternal, gestational, and infant factors and newborn birth weight using Ordinary Least Squares (OLS) regression and Bayesian analysis. The OLS model revealed a strong positive correlation between gestational length and birth weight, with each additional week of gestation associated with an average increase of approximately 114.06 grams in birth weight. Maternal age and education emerged as significant predictors, with older mothers tending to have infants with higher birth weights, potentially due to greater life experience and healthier lifestyle choices. Maternal education demonstrated an even stronger effect, indicating that higher educational levels equip mothers with knowledge conducive to practices that benefit fetal health. Marital status was another key factor, with single or divorced mothers having lower infant birth weights, likely reflecting greater socioeconomic and psychological stress. Male infants were generally heavier at birth than female infants, a pattern consistent with biological norms. Early initiation of prenatal care also positively influenced birth weight, underscoring the importance of timely and effective pregnancy management. The Bayesian model produced similar coefficients, reinforcing the robustness of these findings while addressing potential limitations of the OLS assumptions.
+
+This study reveals that infant birth weight is not solely influenced by gestational length but also by other factors, highlighting its complex nature. It is insufficient to predict birth weight based solely on maternal age, education, or similar information. In the study's model, despite incorporating multiple predictors, the R-squared value remains below 30%, indicating that unmeasured variables may significantly contribute to variations in birth weight. The analysis has its limitations due to the data available. Future research could include additional variables, such as maternal health during pregnancy, as predictors to potentially improve the accuracy of birth weight predictions.
 
 
-
-
-Telegraphing paragraph: The remainder of this paper is structured as follows. @sec-data....
+This paper is structured as follows: @sec-data provides a detailed overview of the dataset used in the study, including definitions of the outcome and predictor variables, as well as a discussion of key characteristics and limitations. @sec-model introduces the models employed, outlining the Ordinary Least Squares (OLS) and Bayesian models, along with their respective assumptions and methodologies. @sec-results presents the regression results, offering a detailed explanation of how each predictor influences the outcome variable. Finally, @sec-discussion explores the broader implications of the findings, addresses study limitations, and proposes directions for future research.
 
 
 
@@ -98,9 +99,10 @@ Despite these limitations, the dataset has low measurement error in variables li
 
 ## Outcome variables
 
-Birthweight is reported in some areas in pounds and ounces rather than grams. To ensure consistency, we present statistical data using the metric unit of grams. A birth weight below 2500 grams is classified as low birth weight, while a weight below 1500 grams is considered very low birth weight [@nchs_2008]. Newborns with low birth weight often require specialized care, such as admission to a Neonatal Intensive Care Unit (NICU).
 
+Birthweight is reported in some areas in pounds and ounces rather than in grams. However, the metric system has been used in tabulating and presenting the statistics to facilitate comparison with data published by other groups. Equivalents of the gram weights in terms of pounds and ounces are all reported using the metric unit of grams. 
 
+A birth weight below 2500 grams is classified as low birth weight, while a weight below 1500 grams is considered very low birth weight [@nchs_2008]. Newborns with low birth weight often require specialized care, such as admission to a Neonatal Intensive Care Unit (NICU).
 
 
 @fig-weight shows the distribution of the birth weight in the sample data set. Among the observations, `r sum(birth$weight < 2000)` cases are classified as low birth weight, representing approximately `r round(mean(birth$weight < 2000)*100,2)` % of the sample. The mean birth weight is `r round(mean(birth$weight),2)` grams, with the lowest recorded birth weight being `r round(min(birth$weight),2)` grams. The distribution of birth weights appears to be approximately normal. Given that the data was collected through random sampling, a linear regression model can be appropriately applied to analyze the relationships between birth weight and the selected predictors.
@@ -126,11 +128,12 @@ ggplot(birth, aes(x = weight)) +
 
 There are 4 numerical and 2 categorical predictors in the sample. The summary of these numerical predictors are shown in @tbl-summary， and their distribution are shown in @fig-predictor. 
 
-In this sample, maternal age ranges from 14 to 42 years, as shown in Figure 2. The distribution of maternal age is concentrated between 20 and 40 years, with the number of births decreasing steadily after age 30. Maternal age is obtained through official documentation, ensuring high accuracy.  
+In this sample, maternal age ranges from 14 to 42 years, as shown in Figure 2. The distribution of maternal age is concentrated between 20 and 40 years, with the number of births decreasing steadily after age 30. Maternal age is obtained through official documentation, ensuring high accuracy. 
+I predict that as mothers age, they are more likely to have encountered greater childbirth-related experience in life. These experiences help them develop better lifestyle habits and nutrition, which are beneficial for fetal development. 
 
-Additionally, maternal education is mostly concentrated at 12 years, corresponding to high school completion. This peak likely reflects that many mothers choose to enter the workforce after high school. Another peak occurs at 16 years, aligning with the typical length of a university education, as completing a four-year degree results in 16 years of education.  
+Additionally, maternal education is mostly concentrated at 12 years, corresponding to high school completion. This peak likely reflects that many mothers choose to enter the workforce after high school. Another peak occurs at 16 years, aligning with the typical length of a university education, as completing a four-year degree results in 16 years of education.  Highly educated mothers have advantages in both income and knowledge. Therefore, I predict that higher education levels can promote fetal health, leading to an increase in birth weight.
 
-The mode of gestational length is 40 weeks, with a sharp decline in births beyond 40 weeks. However, the probability of birth increases after 36 weeks, as 36 weeks marks the threshold for full-term infants, and delivery can occur anytime after this point.  
+The mode of gestational length is 40 weeks, with a sharp decline in births beyond 40 weeks. However, the probability of birth increases after 36 weeks, as 36 weeks marks the threshold for full-term infants, and delivery can occur anytime after this point.  As the fetus develops in the mother's womb, a longer gestation period allows more time for the fetus to receive nutrients, which in turn contributes to increased birth weight.
 
 **Prenatalstart** refers to the timing of when prenatal care begins during pregnancy. Earlier initiation of prenatal care is essential for promoting fetal development and supporting maternal health. In this dataset, the mode of prenatalstart is 2, indicating that most mothers began prenatal care during their second month of pregnancy. Furthermore, the majority of these values are less than 5, reflecting that in the United States, parents are generally able to detect pregnancy early and provide timely and necessary prenatal care.
 
@@ -229,7 +232,7 @@ ggplot(data = birth, aes(x = gestation, y = weight)) +
 ```
 
 
-# Model
+# Model {#sec-model}
 
 The goal of our modeling strategy is twofold. First, we aim to investigate the influence of Parental Attributes (such as parental age and education) and Pregnancy and Infant Factors (like gestational age, timing of prenatal care, and infant sex) on newborn birth weight. This analysis seeks to identify the critical determinants of birth weight and their relative impacts. Second, we aspire to derive insights from these findings that can inform the public about fundamental aspects of childbirth. For instance, we explore the roles of parental characteristics, the gestation period, and prenatal care in fostering healthy birth weights. Moreover, by including infant sex in the model, we aim to mitigate omitted variable bias, ensuring a more accurate understanding of predictor effects. This comprehensive approach not only contributes to the academic study of birth outcomes but also provides practical insights for improving maternal and neonatal health practices.
 
@@ -240,7 +243,17 @@ In the Bayesian framework, model parameters are treated as random variables with
 
 ## Model set-up
 
-I will use the Bayesian multiple linear regression model to build the relationship between birth weight and other predictors. Define $y_i$ as the birth weight in grams. Then the model is shown in the following: 
+I will use the OLS model and Bayesian multiple linear regression model to build the relationship between birth weight and other predictors. Define $y_i$ as the birth weight in grams. The OLS model is shown as following:
+
+
+\begin{align}
+y_i &= \beta_0 + \beta_1 MomAge_{i} + \beta_2 MomEduc_{i} + \beta_3 gestation_{i} + \beta_4 prenatalstart_{i} +  \epsilon_{i} \\
+\epsilon_{i} &\sim \mbox{Normal}(0, \sigma^2)
+\end{align}
+
+
+
+Then the Bayesian model is shown in the following: 
 
 \begin{align}
 y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
@@ -256,16 +269,14 @@ y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
 \sigma &\sim \mbox{Exponential}(1)
 \end{align}
 
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
+We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`. 
 
 
-### Model justification
+## Model justification
 
 We expect a positive relationship between the length of gestation and birth weight, as longer gestation generally results in higher birth weights. Maternal age is another important factor influencing infant health. Older mothers, especially those over the age of 35, often face higher risks during pregnancy, which can impact fetal development [@frederiksen2018risk]. Maternal education level also plays a crucial role, as more educated mothers are more likely to understand and follow scientifically supported prenatal care practices, benefiting fetal growth. Additionally, marital status can influence pregnancy outcomes. Married women may receive more support from their partners, leading to better nutrition and healthcare, which in turn benefits fetal development. Furthermore, the earlier prenatal care begins, the more favorable it is for the fetus’s health. Given these considerations, we have selected these factors as predictors for our model. To account for potential biases due to infant gender, we have included it in the model to reduce omitted variable bias.
 
-# Results
-
-Our results are summarized in @tbl-modelresults.
+# Results{#sec-results}
 
 ```{r}
 #| echo: false
@@ -274,6 +285,8 @@ Our results are summarized in @tbl-modelresults.
 #| message: false
 
 library(rstanarm)
+first_model0 <-
+  readRDS(file = here::here("models/first_model0.rds"))
 
 first_model <-
   readRDS(file = here::here("models/first_model.rds"))
@@ -290,11 +303,17 @@ second_model <-
 
 modelsummary::modelsummary(
   list(
-    "First model" = first_model
+    "OLS model 1" = first_model0,
+    "OLS model 2" = first_model
   ),
-  fmt = 2
-)
+  fmt = 2)
 ```
+
+Firstly, the OLS model results are summarized in @tbl-modelresults1. To validate the relationship between the length of gestation and birth weight, a simple linear regression (SLR) using only one variable is presented in the first column of @tbl-modelresults1. It shows that for every additional week of gestation, the birth weight increases by approximately `r first_model0$coefficients[2]` grams. The corresponding R-squared value for this SLR is `r summary(first_model0)$r.squared`, indicating that `r summary(first_model0)$r.squared *100`% of the variation in birth weight can be explained by gestation. This result aligns with expectations, confirming that full-term pregnancies reduce the likelihood of low birth weight.
+
+Subsequently, additional predictors such as maternal age, education, marital status, infant gender, and the timing of prenatal care were added to the model (shown in the second column of @tbl-modelresults1). Maternal age (`r first_model$coefficients[2]`) positively impacts birth weight, suggesting that with age, mothers gain experience beneficial for infant development. Maternal education (`r first_model$coefficients[3]`) has an even more pronounced effect on increasing birth weight, as knowledge enables mothers to adopt scientific methods to promote infant health. Marital status (`r first_model$coefficients[4]`) indicates that divorce negatively affects birth weight, as single mothers, lacking support from a spouse, face greater stress and challenges, leading to lower birth weights.It shows that for every additional week of gestation, the birth weight increases by approximately `r first_model$coefficients[5]` grams. Considering the influence of infant gender (`r first_model$coefficients[6]`), male infants tend to weigh more at birth. Lastly, an earlier start to prenatal care (`r first_model$coefficients[7]`) is shown to  improve birth weight, emphasizing the importance of early pregnancy detection and timely preparation for childbirth.
+
+
 
 
 ```{r}
@@ -306,28 +325,49 @@ modelsummary::modelsummary(
 
 modelsummary::modelsummary(
   list(
-    "First model" = second_model
+    "Bayesian model" = second_model
   ),
-  fmt = 2
-)
+  fmt = 2)
 ```
 
 
-# Discussion
 
-## First discussion point {#sec-first-point}
 
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
+The validity of OLS results depends on meeting critical assumptions. Therefore, this study adopts a Bayesian analysis model to reanalyze the data. By integrating prior knowledge and accounting for uncertainty, the Bayesian model provides a more robust and reliable explanation of the factors influencing the dataset. The coefficient table are shown in @tbl-modelresults2. Maternal age (`r second_model$coefficients[2]`) and education (`r second_model$coefficients[3]`) positively influence birth weight, with older and more educated mothers better supporting infant development. Marital status (`r second_model$coefficients[4]`) shows that divorce negatively impacts birth weight, as single mothers face greater stress and less support. Male infants (`r second_model$coefficients[5]`) typically weigh more, and earlier prenatal (`r second_model$coefficients[6]`) care significantly improves birth weight, highlighting the need for timely pregnancy preparation.Comparing the Bayesian model results (@tbl-modelresults2) with OLS model results (@tbl-modelresults1) reveals that the coefficients obtained are similar to those from the OLS method. This alignment indicates that the model used in this study is robust and reliable.
 
-## Second discussion point
 
-Please don't use these as sub-heading labels - change them to be what your point actually is.
 
-## Third discussion point
+
+# Discussion{#sec-discussion}
+
+## Whats is done  {#sec-first-point}
+
+This study uses a simple random sampling (SRS) method to analyze data on newborns born in the United States in 1998. The research reveals a linear relationship between the length of gestation and birth weight. Additionally, maternal age, education level, prenatal preparation, and marital status are identified as significant factors influencing birth weight. Birth weight is closely tied to infant health. Contrary to societal concerns about risks associated with advanced maternal age, the findings show that increasing maternal age positively impacts birth weight. However, the data indicate a decline in childbirth among women over 30. To improve birth rates, it is crucial to address misconceptions about advanced maternal age and its impact on infant health, as these concerns may discourage women from having children after 30.
+
+Regarding maternal education, higher levels of education correlate with increased birth weights, aligning with expectations. However, many women opt out of further education after high school graduation, potentially due to economic pressures. Since professional knowledge significantly influences the quality of prenatal care, measuring education solely in terms of years may introduce bias. Data on specific fields of study, which are often unavailable, could provide better insights. Future research might address this gap through survey-based questionnaires.
+
+Similarly, the timing of prenatal care does not fully capture its quality. Despite including predictors such as maternal age, education, and prenatal care timing, the model explains less than 30% of the variation in birth weight, highlighting the need for additional factors to improve explanatory power.
+
+## What is something that we learn about the world?
+
+The study results show that for every additional week a fetus stays in the mother's womb, the birth weight increases by `r first_model$coefficients[5]` grams. This positive correlation suggests that, under normal circumstances, the fetus should remain in the womb as close to 40 weeks as possible for optimal birth weight. However, with current technological advances, induction and cesarean sections have become more common. Induction refers to using medication to speed up labor, while a cesarean section is an intervention to artificially set a delivery date, even in the absence of signs of labor. Both induction and cesarean sections reduce the time the fetus spends in the womb. Therefore, doctors and expectant mothers should allow for natural delivery unless there are medical complications or emergencies.
+
+However, gestation is only one of the factors influencing birth weight, explaining only 16% of the variation. This indicates the need for further research to explore other factors affecting birth weight.
+
+In the literature, maternal weight gain during pregnancy also has a significant impact on birth weight. The fetus obtains nutrients through the umbilical cord, meaning the mother's nutrition indirectly affects the fetus's birth weight. In addition to diet, maternal mental health can also influence fetal growth. This explains why factors such as maternal age, education, and marital status also play a role in birth weight.
+
+There has been a societal belief that older mothers are detrimental to their babies' health. However, our regression results show that as maternal age increases, birth weight slightly increases as well. This challenges the prevailing concerns about older mothers and suggests that further research is needed to verify the relationship between maternal age and birth weight.
+
 
 ## Weaknesses and next steps
 
-Weaknesses and next steps should also be included.
+
+The aim of this study is to explore the factors influencing birth weight, using publicly available data from the National Center for Health Statistics (NCHS). The weakness is that although this dataset covers the entire population, it lacks specific physical metrics, which limits its explanatory power regarding birth weight. One of the benefits of using public data is its easy accessibility and the higher reliability due to its official collection. However, due to privacy concerns, certain detailed information is not available. For example, pregnancy duration is recorded in weeks rather than days, and the education level is only captured in years without considering the specific field of study. Different educational disciplines provide varying degrees of knowledge, and not all educational knowledge directly impacts prenatal care and lifestyle choices during pregnancy.
+
+To improve the prediction of birth weight, it is necessary to collect more detailed personal information. One potential approach could be to collaborate directly with hospitals and extract data from their databases for research. However, hospitals may refuse to cooperate due to privacy issues. An alternative could be to conduct surveys with mothers to gather the necessary data. While this method can face issues such as selection bias, response bias, and response errors, designing a reasonable survey and securing sufficient funding for the project will be key areas for future research to ensure accurate data collection.
+
+This study has practical implications for government policies. For vulnerable groups such as single mothers or those with limited education, the government can provide targeted subsidies to support maternal and infant health. Additionally, further research into the potential negative effects of advanced maternal age on infant health could help verify the accuracy of such concerns.
+
 
 \newpage
 
@@ -336,15 +376,82 @@ Weaknesses and next steps should also be included.
 # Appendix {-}
 
 
-# Additional data details
+# Surveys, sampling, and observational data
+
+## Population, Frame and sample
+
+**Population**: Population refers to all births in the United States, including birth statistics for all states and the District of Columbia based on information in the General Record File. This information is received on computer data tapes coded by state and provided to the National Center for Health Statistics (NCHS) through the Vital Statistics Cooperative Program. NCHS receives data for this file from registries in all states, the District of Columbia, and New York City. Birth data for Puerto Rico, the Virgin Islands, Guam, American Samoa, and the Commonwealth of the Northern Mariana Islands (CNMI) are included in the Public Use File as separate data sets.
+
+Birth data for the United States are limited to births to U.S. residents and nonresidents within the United States. All statistical tables by residence exclude births to nonresidents. This file does not include births to U.S. citizens outside the United States. Birth data for Puerto Rico, the Virgin Islands, Guam, American Samoa, and the CNMI are limited to births within their respective territories.
+
+**Frame**: The frame is the list of birth records by the NCHS in 1998. 
+
+**Sample**: The sample data is collected by simple random sampling by using set.seed(1) in R [@citeR], the sample size is 200. The sample data is published on the DASL [@dasl_birthweight]. The Description of  Predictor Variables are shown in @tbl-Predictor. 
+
+```{r}
+#| label: tbl-Predictor
+#| tbl-cap: "Description of  Predictor Variables"
+#| echo: false
+#| warning: false
+
+
+# Create a data frame explaining each variable
+variable_summary <- data.frame(
+  Variable = c("MomAge", "MomEduc", "MomMarital", 
+               "gestation", "sex", "prenatalstart"),
+  Description = c(
+    "Mother’s Single Year of Age",
+    "Mother’s Education in year",
+    "Mother’s Marital Status (1 = Yes, 2 = No).",
+    "Gestation – Detail in Weeks,The primary measure used to determine the gestational age of the newborn is the interval between the first day of the mother’s last normal menstrual period (LMP) and the date of birth.",
+    "Sex of Infant, M male,F Female.",
+    "Month Prenatal Care Began in Month"
+  )
+)
+
+variable_summary |>
+  kable("latex", booktabs = TRUE, escape = FALSE) |>
+  column_spec(1, width = "5em") |>  # Set width for the first column
+  column_spec(2, width = "20em")    # Set width for the second column
+
+```
+
+
+## Simulating Scheme
+
+Given the observed positive correlation between birth weight and gestation, while other variables show less noticeable relationships with birth weight, I designed a simulation to model this relationship. A linear connection between these two variables was specified, with random noise added to simulate birth weight. I set the marginal effect of gestation on birth weight to 82.3, meaning that for each additional week of gestation, the infant's birth weight increases by 82.3 on average.
+
+In the simulation, maternal education was assumed to follow a normal distribution, which might not accurately reflect reality, as people often finish schooling at milestones like high school or college graduation. Prenatal care, which most often begins in the second month, was simulated using a Poisson distribution to reflect its skewed timing. During the testing phase, I ensured all variables were correctly typed and verified that their ranges were within reasonable scales, ensuring the integrity of the simulation.
+
+
+## Link to Literature
+
+The birth rate of a country significantly impacts its future development. Nations with higher birth rates often have better long-term growth prospects. Historically, early German studies on infant health frequently focused on specific hospitals and their records over defined periods. For example, UCSF's Fetal Hospital conducted research involving 2,946 live births at 37 weeks of gestation to examine how maternal weight gain influenced infant birth weight [@abrams1986prepregnancy].
+
+However, relying on regional data can introduce selection bias. For instance, in affluent areas, concerns about fetal malnutrition may be minimal, making such samples unrepresentative of the broader U.S. newborn population. Additionally, hospital-collected data often suffer from recording errors and a higher prevalence of missing values. In contrast, the data used in this study come from official sources, offering greater reliability and accuracy for analysis.
 
 # Model details {#sec-model-details}
 
-## Diagnostics
+## Diagnostic of OLS model 
+```{r}
+#| label: fig-diagnostic
+#| fig-cap: Diagnostic of OLS model
+#| echo: false
+#| warning: false
 
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
+#Create residual plot for OLS model 
 
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
+ggplot(data = data.frame(Fitted = fitted(first_model),
+                         Residuals = residuals(first_model)), 
+       aes(x = Fitted, y = Residuals)) +
+  geom_point(color = "blue") +
+  geom_hline(yintercept = 0, color = "red", linetype = "dashed") +
+  labs(title = "Residual Plot", x = "Fitted Values", y = "Residuals") +
+  theme_minimal()
+
+```
+
+@fig-diagnostic illustrates the residual plot of the OLS model. The residual plot indicates that the assumptions of the OLS model are generally met. Due to this adherence to assumptions, the OLS results show a high degree of similarity to the Bayesian model outcomes, further validating the methods used in this study.
 
 
 

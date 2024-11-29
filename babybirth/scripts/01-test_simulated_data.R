@@ -1,7 +1,7 @@
 #### Preamble ####
 # Purpose: Tests the structure and validity of the simulated birth dataf 
 # Author: ruiyang pang
-# Date: 26 Nov 2024
+# Date: 23 Nov 2024
 # Contact: ruiyang.pang@mail.utoronto.ca
 # License: MIT
 # Pre-requisites: 

@@ -37,7 +37,7 @@ sex = sample(c("F", "M"), 200, replace = TRUE)
 
 # birth weight
 
-weight <- rnorm(200, 3250, 500)
+weight <- gestation * 3250/ 39.5 + rnorm(200, 0, 500)
 
 # prenatal start week
 prenatalstart <- rpois(200, 2)

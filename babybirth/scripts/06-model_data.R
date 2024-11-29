@@ -15,7 +15,16 @@ library(rstanarm)
 #### Read data ####
 analysis_data <- read_csv("data/02-analysis_data/analysis_data.csv")
 
-### OLS Model data ####
+### OLS Model data, basic model ####
+first_model0 <- lm(weight~gestation, data = analysis_data)
+
+#### Save model ####
+saveRDS(
+  first_model0,
+  file = "models/first_model0.rds"
+)
+
+### OLS Model data , MLR ####
 first_model <- lm(weight~MomAge + MomEduc + MomMarital + gestation + 
                     as.factor(sex) + prenatalstart, data = analysis_data)
 
@@ -24,6 +33,7 @@ saveRDS(
   first_model,
   file = "models/first_model.rds"
 )
+
 
 
 ### Bayesian  Model data ####
